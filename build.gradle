@@ -1,0 +1,22 @@
+apply plugin: 'java'
+
+repositories {
+	mavenCentral()
+}
+
+
+def logbackVersion = '1.0.1'
+
+dependencies {
+
+	compile 'com.jcraft:jsch:0.1.51'
+
+
+	compile 'ch.qos.logback:logback-classic:' + logbackVersion
+	compile 'ch.qos.logback:logback-core:' + logbackVersion
+	compile 'commons-io:commons-io:2.4'
+	compile 'org.apache.httpcomponents:httpclient:4.4.1'
+	
+
+    testCompile 'junit:junit:4.11'
+}
