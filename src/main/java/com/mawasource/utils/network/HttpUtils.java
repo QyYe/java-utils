@@ -89,9 +89,6 @@ public class HttpUtils {
 	/**
 	 * creates an apache http client which ignores ssl certificate errors
 	 * @return
-	 * @throws KeyManagementException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
 	 */
 	public static HttpClient createSSLHttpClient() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
