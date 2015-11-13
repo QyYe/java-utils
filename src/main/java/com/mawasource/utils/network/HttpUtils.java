@@ -16,6 +16,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -35,6 +36,50 @@ import org.slf4j.LoggerFactory;
 public class HttpUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
+	
+	/**
+	 * send a default http-post request
+	 * 
+	 * @param url
+	 * @param body
+	 * @param username
+	 * @param password
+	 * @return response as string
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public static String get(final String url, final String username, final String password)
+			throws ClientProtocolException, IOException {
+		return get(buildClient(url, username, password), url);
+	}
+	
+	/**
+	 * send a default http-post request
+	 * 
+	 * @param url
+	 * @param body
+	 * @return response as string
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public static String get(final String url)
+			throws ClientProtocolException, IOException {
+		return get(buildClient(url, null, null), url);
+	}
+	
+	/**
+	 * send a default http-post request
+	 * 
+	 * @param url
+	 * @param body
+	 * @return response as string
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public static String post(final String url, final String body)
+			throws ClientProtocolException, IOException {
+		return post(url, body, null, null, null);
+	}
 
 	/**
 	 * send a default http-post request
@@ -67,9 +112,7 @@ public class HttpUtils {
 	 */
 	public static String post(final String url, final String body, final String contentType, final String username,
 			final String password) throws ClientProtocolException, IOException {
-		HttpClientBuilder builder = createHttpClientBuilder(username, password);
-		HttpClient client = url.startsWith("https") ? createSSLHttpClient(builder) : builder.build();
-		return post(client, url, body, contentType);
+		return post(buildClient(url, username, password), url, body, contentType);
 	}
 
 	/**
@@ -90,14 +133,43 @@ public class HttpUtils {
 			throws ClientProtocolException, IOException {
 
 		HttpPost post = new HttpPost(url);
-
 		HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
 		post.setEntity(entity);
 		if (contentType != null) {
 			post.setHeader("Content-Type", contentType);
 		}
 
-		HttpResponse response = client.execute(post);
+		return getResponse(client.execute(post));
+		
+	}
+	
+	/**
+	 * sends a get request with the given http client
+	 * 
+	 * @param client
+	 *            apache http client
+	 * @param url
+	 *            where the post request is sent to
+	 * @param body
+	 *            post body
+	 * @param contentType
+	 * @return
+	 * @throws UnsupportedOperationException 
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	private static String get(HttpClient client, final String url) throws UnsupportedOperationException, ClientProtocolException, IOException {
+		return getResponse(client.execute(new HttpGet(url)));
+	}
+	
+	private static HttpClient buildClient(String url, String username, String password) {
+		HttpClientBuilder builder = createHttpClientBuilder(username, password);
+		HttpClient client = url.startsWith("https") ? createSSLHttpClient(builder) : builder.build();
+		return client;
+	}
+	
+	
+	private static String getResponse(HttpResponse response) throws UnsupportedOperationException, IOException {
 		logger.debug("HttpPost-Response Code : " + response.getStatusLine().getStatusCode());
 
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
