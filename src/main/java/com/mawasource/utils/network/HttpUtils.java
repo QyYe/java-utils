@@ -164,6 +164,7 @@ public class HttpUtils {
 	
 	private static HttpClient buildClient(String url, String username, String password) {
 		HttpClientBuilder builder = createHttpClientBuilder(username, password);
+		builder.disableContentCompression();
 		HttpClient client = url.startsWith("https") ? createSSLHttpClient(builder) : builder.build();
 		return client;
 	}
