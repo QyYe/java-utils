@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class HttpUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
-	
+
 	/**
 	 * send a default http-post request
 	 * 
@@ -48,53 +48,45 @@ public class HttpUtils {
 	 * @param username
 	 * @param password
 	 * @return response as string
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static String get(final String url, final String username, final String password)
-			throws ClientProtocolException, IOException {
+	public static String get(final String url, final String username, final String password) throws IOException {
 		return get(buildClient(url, username, password), url);
 	}
-	
+
 	/**
 	 * send a default http-post request
 	 * 
 	 * @param url
 	 * @param body
 	 * @return response as string
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static String get(final String url)
-			throws ClientProtocolException, IOException {
+	public static String get(final String url) throws IOException {
 		return get(buildClient(url, null, null), url);
 	}
-	
+
 	/**
 	 * send a default http-post request
 	 * 
 	 * @param url
 	 * @param body
 	 * @return response as string
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static String post(final String url, final String body)
-			throws ClientProtocolException, IOException {
+	public static String post(final String url, final String body) throws IOException {
 		return post(buildClient(url, null, null), body, null, null);
 	}
-	
+
 	/**
 	 * send a default http-post request
 	 * 
 	 * @param url
 	 * @param parameters
 	 * @return response as string
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static String post(final String url, final List<NameValuePair> parameters)
-			throws ClientProtocolException, IOException {
+	public static String post(final String url, final List<NameValuePair> parameters) throws IOException {
 		return post(buildClient(url, null, null), url, new UrlEncodedFormEntity(parameters), null);
 	}
 
@@ -106,11 +98,10 @@ public class HttpUtils {
 	 * @param username
 	 * @param password
 	 * @return response as string
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
 	public static String post(final String url, final String body, final String username, final String password)
-			throws ClientProtocolException, IOException {
+			throws IOException {
 		return post(url, body, null, username, password);
 	}
 
@@ -124,12 +115,12 @@ public class HttpUtils {
 	 * @param username
 	 * @param password
 	 * @return response as string
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
 	public static String post(final String url, final String body, final String contentType, final String username,
-			final String password) throws ClientProtocolException, IOException {
-		return post(buildClient(url, username, password), url, new ByteArrayEntity(body.getBytes("UTF-8")), contentType);
+			final String password) throws IOException {
+		return post(buildClient(url, username, password), url, new ByteArrayEntity(body.getBytes("UTF-8")),
+				contentType);
 	}
 
 	/**
@@ -143,11 +134,10 @@ public class HttpUtils {
 	 *            http entity
 	 * @param contentType
 	 * @return
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
 	private static String post(HttpClient client, final String url, final HttpEntity entity, final String contentType)
-			throws ClientProtocolException, IOException {
+			throws IOException {
 
 		final HttpPost post = new HttpPost(url);
 		post.setEntity(entity);
@@ -156,9 +146,9 @@ public class HttpUtils {
 		}
 
 		return getResponse(client.execute(post));
-		
+
 	}
-	
+
 	/**
 	 * sends a get request with the given http client
 	 * 
@@ -170,26 +160,23 @@ public class HttpUtils {
 	 *            post body
 	 * @param contentType
 	 * @return
-	 * @throws UnsupportedOperationException 
-	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private static String get(HttpClient client, final String url) throws UnsupportedOperationException, ClientProtocolException, IOException {
+	private static String get(HttpClient client, final String url) throws IOException {
 		return getResponse(client.execute(new HttpGet(url)));
 	}
-	
+
 	private static HttpClient buildClient(String url, String username, String password) {
 		HttpClientBuilder builder = createHttpClientBuilder(username, password);
 		builder.disableContentCompression();
 		HttpClient client = url.startsWith("https") ? createSSLHttpClient(builder) : builder.build();
 		return client;
 	}
-	
-	
-	private static String getResponse(HttpResponse response) throws UnsupportedOperationException, IOException {
+
+	private static String getResponse(HttpResponse response) throws IOException {
 		logger.debug("HttpPost-Response Code : " + response.getStatusLine().getStatusCode());
 
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
@@ -207,9 +194,11 @@ public class HttpUtils {
 	private static HttpClient createSSLHttpClient(HttpClientBuilder builder) {
 		SSLContext sslContext;
 		try {
-			sslContext = SSLContexts.custom().useProtocol("TLSv1").loadTrustMaterial(new TrustSelfSignedStrategy()).build();
+			sslContext = SSLContexts.custom().useProtocol("TLSv1").loadTrustMaterial(new TrustSelfSignedStrategy())
+					.build();
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
-			Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("https", sslsf).build();
+			Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
+					.register("https", sslsf).build();
 			HttpClientConnectionManager ccm = new BasicHttpClientConnectionManager(registry);
 			builder.setConnectionManager(ccm);
 
