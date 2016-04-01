@@ -6,16 +6,19 @@ import java.io.InputStreamReader;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
@@ -78,7 +81,21 @@ public class HttpUtils {
 	 */
 	public static String post(final String url, final String body)
 			throws ClientProtocolException, IOException {
-		return post(url, body, null, null, null);
+		return post(buildClient(url, null, null), body, null, null);
+	}
+	
+	/**
+	 * send a default http-post request
+	 * 
+	 * @param url
+	 * @param parameters
+	 * @return response as string
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public static String post(final String url, final List<NameValuePair> parameters)
+			throws ClientProtocolException, IOException {
+		return post(buildClient(url, null, null), url, new UrlEncodedFormEntity(parameters), null);
 	}
 
 	/**
@@ -112,7 +129,7 @@ public class HttpUtils {
 	 */
 	public static String post(final String url, final String body, final String contentType, final String username,
 			final String password) throws ClientProtocolException, IOException {
-		return post(buildClient(url, username, password), url, body, contentType);
+		return post(buildClient(url, username, password), url, new ByteArrayEntity(body.getBytes("UTF-8")), contentType);
 	}
 
 	/**
@@ -122,18 +139,17 @@ public class HttpUtils {
 	 *            apache http client
 	 * @param url
 	 *            where the post request is sent to
-	 * @param body
-	 *            post body
+	 * @param entity
+	 *            http entity
 	 * @param contentType
 	 * @return
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private static String post(HttpClient client, final String url, final String body, final String contentType)
+	private static String post(HttpClient client, final String url, final HttpEntity entity, final String contentType)
 			throws ClientProtocolException, IOException {
 
-		HttpPost post = new HttpPost(url);
-		HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
+		final HttpPost post = new HttpPost(url);
 		post.setEntity(entity);
 		if (contentType != null) {
 			post.setHeader("Content-Type", contentType);

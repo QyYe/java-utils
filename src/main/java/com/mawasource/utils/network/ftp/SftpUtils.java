@@ -117,6 +117,7 @@ public class SftpUtils {
 	 * @param localFolder
 	 * @throws SftpException
 	 */
+	@SuppressWarnings("unchecked")
 	public void downloadFiles(String remoteFolder, String localFolder) throws SftpException {
 		File localFile = new File(localFolder);
 		if (localFile.exists()) {
