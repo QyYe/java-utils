@@ -1,6 +1,7 @@
 package com.mawasource.utils.network;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyManagementException;
@@ -54,15 +55,25 @@ public class HttpUtils {
 	}
 
 	/**
-	 * send a default http-post request
+	 * send a default http-get request
 	 * 
 	 * @param url
-	 * @param body
 	 * @return response as string
 	 * @throws IOException
 	 */
 	public static String get(final String url) throws IOException {
 		return get(buildClient(url, null, null), url);
+	}
+	
+	/**
+	 * send a default http-get request and return response as byte array
+	 * 
+	 * @param url
+	 * @return response as string
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(final String url) throws IOException {
+		return getResponseAsBytes(buildClient(url, null, null).execute(new HttpGet(url)));
 	}
 
 	/**
@@ -170,6 +181,13 @@ public class HttpUtils {
 		builder.disableContentCompression();
 		HttpClient client = url.startsWith("https") ? createSSLHttpClient(builder) : builder.build();
 		return client;
+	}
+	
+	private static byte[] getResponseAsBytes(HttpResponse response) throws IOException {
+		HttpEntity entity = response.getEntity();
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+	    entity.writeTo(baos);
+	    return baos.toByteArray();
 	}
 
 	private static String getResponse(HttpResponse response) throws IOException {
