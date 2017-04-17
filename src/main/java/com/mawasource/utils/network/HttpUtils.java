@@ -29,6 +29,7 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
@@ -44,7 +45,6 @@ public class HttpUtils {
 	 * send a default http-post request
 	 * 
 	 * @param url
-	 * @param body
 	 * @param username
 	 * @param password
 	 * @return response as string
@@ -76,6 +76,18 @@ public class HttpUtils {
 		return getResponseAsBytes(buildClient(url, null, null).execute(new HttpGet(url)));
 	}
 
+	
+	/**
+	 * send a default http-post request
+	 * 
+	 * @param url
+	 * @return response as string
+	 * @throws IOException
+	 */
+	public static String post(final String url) throws IOException {
+		return post(buildClient(url, null, null), url, null, null);
+	}
+	
 	/**
 	 * send a default http-post request
 	 * 
@@ -85,7 +97,7 @@ public class HttpUtils {
 	 * @throws IOException
 	 */
 	public static String post(final String url, final String body) throws IOException {
-		return post(buildClient(url, null, null), body, null, null);
+		return post(buildClient(url, null, null), url, new StringEntity(body), null);
 	}
 
 	/**
@@ -150,7 +162,9 @@ public class HttpUtils {
 			throws IOException {
 
 		final HttpPost post = new HttpPost(url);
-		post.setEntity(entity);
+		if (entity != null) {
+			post.setEntity(entity);
+		}
 		if (contentType != null) {
 			post.setHeader("Content-Type", contentType);
 		}
@@ -166,9 +180,6 @@ public class HttpUtils {
 	 *            apache http client
 	 * @param url
 	 *            where the post request is sent to
-	 * @param body
-	 *            post body
-	 * @param contentType
 	 * @return
 	 * @throws IOException
 	 */
